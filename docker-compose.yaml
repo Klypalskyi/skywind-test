@@ -1,0 +1,45 @@
+version: '3.4'
+
+networks: 
+  skywind:
+    driver: bridge
+
+services:
+  memsql-skywind:
+    env_file: ./database/.env
+    build: ./database
+    container_name: memsql-skywind
+    networks: 
+      - skywind
+    ports:
+      - 3306:3306
+      - 8080:8080
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+  service-b:
+    build: ./service-b
+    restart: on-failure
+    container_name: service-b
+    networks: 
+      - skywind
+    env_file:
+      - ./service-b/.env
+    ports:
+      - '50051:50051'
+    expose:
+      - "50051"
+    depends_on:
+      - memsql-skywind
+  service-a:
+    build: ./service-a
+    container_name: service-a
+    links:
+      - service-b
+    networks: 
+      - skywind
+    env_file:
+      - ./service-a/.env
+    ports:
+      - '3000:3000'
+    depends_on:
+      - service-b

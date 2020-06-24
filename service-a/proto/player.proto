@@ -1,0 +1,14 @@
+syntax = "proto3";
+package player;
+
+service PlayerService {
+  rpc getPlayerByName (Body) returns (Player) {}
+}
+
+message Body {
+  string name = 1;
+}
+
+message Player {
+  string name = 2;
+}
